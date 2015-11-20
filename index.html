@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title></title>
+        <link rel="stylesheet" href="css/mapstyle.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+        <script src="js/function.js"></script>
+        <script src="js/jquery-1.11.2.min.js"></script>
+        <script src="js/jquery.tinyMap.js"></script>
+        <script>
+            $(window).load(function () {
+                var map = $('.map');
+                var mr = [],text = [],lc = [];
+                var xml = $.ajax({
+                    url: 'parking1.xml',
+                    async: false
+                }).responseXML;
+                $(xml).find("PARK").each(function (i) {
+                    if ($(this).children("TYPE").text() == 1) {
+                        mr.push(twd97_to_latlng($(this).children("TW97X").text(), $(this).children("TW97Y").text()));
+                        text.push("<h3>" + $(this).children("NAME").text() + "</h3>");
+                    }
+                });
+
+                $.ajax({
+                    url: "getJson.php",
+                    type: "GET",
+                    dataType: "json",
+                    success: function (json) {
+                        $.getJSON("getJson.php", function (data) {
+                            var l = data[0].result.results.length;
+                            for (var i = 0; i < l; i++) {
+                                if (data[0].result.results[i]["availableCar"] == "-9") {
+                                    lc.push({ 'addr': mr[i], 'text': text[i] + "剩餘汽車車位:<b>無資訊</b><br>剩餘摩托車位:"+data[0].result.results[i]["availableMotor"] });
+                                }
+                                else if(data[0].result.results[i]["availableMotor"]=="-9"){
+                                    lc.push({ 'addr': mr[i], 'text': text[i] + "剩餘汽車車位:"+data[0].result.results[i]["availableCar"]+"<br>剩餘摩托車位:<b>無資訊</b>" });
+                                }
+                                else if(data[0].result.results[i]["availableMotor"]=="-9" & data[0].result.results[i]["availableCar"] == "-9")
+                                {
+                                    lc.push({ 'addr': mr[i], 'text': text[i] + "剩餘汽車車位:<b>無資訊</b><br>剩餘摩托車位:<b>無資訊</b>" });
+                                }
+                                else {
+                                    lc.push({ 'addr': mr[i], 'text': text[i] + "剩餘汽車車位:" + data[0].result.results[i]["availableCar"]+"<br>剩餘摩托車位:"+data[0].result.results[i]["availableMotor"] });
+                                }
+                            }
+                            map.tinyMap({
+                                'zoom': 14,
+                                'marker': lc,
+                                'autoLocation': function (loc) {
+                                    map.tinyMap('modify', {
+                                        'marker': [{
+                                            'addr': [loc.coords.latitude, loc.coords.longitude],
+                                            'newLabel': '文字標籤',
+                                            'newLabelCSS': 'labels',
+                                            'icon': {
+                                                'url': '/img/big.png',
+                                                'scaledSize': [48, 48]
+                                            },
+                                            'animation': 'DROP'
+                                        }]
+                                    });
+                                }
+                            });
+
+                        });
+                    }
+                });
+
+            });
+        </script>
+        
+    </head>
+    <body>   
+        <div class="fill">           
+            <div class="map"></div>
+        </div>
+    </body>
+</html>

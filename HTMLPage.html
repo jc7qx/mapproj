@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title></title>
+        <script src="js/jquery-1.11.2.min.js"></script>
+        
+        <script>
+            $(document).ready(function () {
+
+                $.ajax({
+                    url: "getJson.php?url='one'",
+                    type: "GET",
+                    dataType: "json",
+                    success: function (json) {
+                        
+                            var l = json[0].result.results.length;
+                            for (var i = 0; i < l; i++) {
+                                document.write(json[0].result.results[i]["availableCar"] + "<br>");
+                            }
+                    }
+                });
+
+                /*var xml2 = $.ajax({
+                url: 'getJson.php',
+                async: false
+                }).responseXML;
+                $(xml).find("_id").each(function (i) {
+                document.write($(this).children("id").text());
+                });*/
+            });
+        </script>
+    </head>
+    <body>
+        <div id="a"></div>
+    </body>
+</html>
